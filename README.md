@@ -44,73 +44,59 @@ Visualize residuals to analyze the models' performance.
 /*
 Program to implement Linear and Polynomial Regression models for predicting car prices.
 Developed by: 212224240129
-RegisterNumber: G.Ramanujam 
-*/
+RegisterNumber: G.Ramanujam
 
-# Program to implement Linear and Polynomial Regression models for predicting car prices.
-# Import Necessary Libraries
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
-from sklearn.preprocessing import PolynomialFeatures
+from sklearn.preprocessing import PolynomialFeatures, StandardScaler
+from sklearn.pipeline import Pipeline
 from sklearn.metrics import mean_squared_error, r2_score
 import matplotlib.pyplot as plt
+df=pd.read_csv('encoded_car_data.csv')
+print(df.head())
 
-# Load the dataset
-file_path = 'https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBM-ML240EN-SkillsNetwork/labs/data/CarPrice_Assignment.csv'
-df = pd.read_csv(file_path)
+x=df[['enginesize','horsepower','citympg','highwaympg']]
+y=df['price']
+x_train, x_test, y_train, y_test=train_test_split(x,y,test_size=0.2, random_state=42)
 
-# Select relevant features and target variable
-X = df[['enginesize', 'horsepower', 'citympg', 'highwaympg']]  # Features
-y = df['price']  # Target variable
+# 1. Linear Regression(with scaling)
+linear_model=Pipeline([('scaler',StandardScaler()),('model',LinearRegression())])
+linear_model.fit(x_train, y_train)
+y_pred_linear=linear_model.predict(x_test)
 
-# Split the dataset
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+# 2. Polynomial Regression(degree=2)
+poly_model=Pipeline([('poly',PolynomialFeatures(degree=2)),('scaler',StandardScaler()),('model',LinearRegression())])
+poly_model.fit(x_train,y_train)
+y_pred_poly=poly_model.predict(x_test)
 
-# 1. Linear Regression
-linear_model = LinearRegression()
-linear_model.fit(X_train, y_train)
-y_pred_linear = linear_model.predict(X_test)
-
-# Evaluate Linear Regression
+# Evaluate models
 print("Linear Regression:")
-print("Mean Squared Error:", mean_squared_error(y_test, y_pred_linear))
-print("R-squared:", r2_score(y_test, y_pred_linear))
+print(f"MSE: {mean_squared_error(y_test,y_pred_linear):.2f}")
+print(f"R2: {r2_score(y_test,y_pred_linear):.2f}")
 
-# 2. Polynomial Regression
-poly = PolynomialFeatures(degree=2)  # Change degree for higher-order polynomials
-X_train_poly = poly.fit_transform(X_train)
-X_test_poly = poly.transform(X_test)
+print("Polynomial Regression:")
+print(f"MSE: {mean_squared_error(y_test,y_pred_poly):.2f}")
+print(f"R2: {r2_score(y_test,y_pred_poly):.2f}")
 
-poly_model = LinearRegression()
-poly_model.fit(X_train_poly, y_train)
-y_pred_poly = poly_model.predict(X_test_poly)
-
-# Evaluate Polynomial Regression
-print("\nPolynomial Regression:")
-print("Mean Squared Error:", mean_squared_error(y_test, y_pred_poly))
-print("R-squared:", r2_score(y_test, y_pred_poly))
-
-# Visualize Results
-plt.figure(figsize=(10, 5))
-
-# Plot Linear Regression Predictions
-plt.scatter(y_test, y_pred_linear, label='Linear Regression', color='blue', alpha=0.6)
-
-# Plot Polynomial Regression Predictions
-plt.scatter(y_test, y_pred_poly, label='Polynomial Regression', color='green', alpha=0.6)
-
-plt.plot([y.min(), y.max()], [y.min(), y.max()], color='red', linestyle='--', linewidth=2)  # Ideal Line
-plt.title("Linear vs Polynomial Regression Predictions")
-plt.xlabel("Actual Prices")
-plt.ylabel("Predicted Prices")
+plt.figure(figsize=(10,5))
+plt.scatter(y_test, y_pred_linear, label='Linear', alpha=0.6)
+plt.scatter(y_test, y_pred_poly, label='Polynomial (degree=2)', alpha=0.6)
+plt.plot([y.min(), y.max()], [y.min(), y.max()], 'r--', label='Perfect Prediction')
+plt.xlabel("Actual Price")
+plt.ylabel("Predicted Price")
+plt.title("Linear vs Polynomial Regression")
 plt.legend()
 plt.show()
+*/
 
 ```
 
 ## Output:
-![Screenshot 2025-05-02 210018](https://github.com/user-attachments/assets/c6c8c759-a27a-4e75-9f95-2db47ef8ac8a)
+
+![Screenshot 2025-05-10 114506](https://github.com/user-attachments/assets/22c6565b-d445-4f79-935c-3575534c653f)
+
+![Screenshot 2025-05-10 114519](https://github.com/user-attachments/assets/73be36e2-4b64-4320-988c-9c6dfb4cdd2d)
 
 
 
